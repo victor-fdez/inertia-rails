@@ -70,3 +70,41 @@ RSpec.describe '/events', inertia: true do
   end
 end
 ```
+
+## Minitest
+
+If you're using Minitest, Inertia Rails also provides test helpers for integration tests.
+
+The helpers are automatically included in `ActionDispatch::IntegrationTest`. To enable Inertia testing in your test, call `inertia_test!` in your setup:
+
+```ruby
+# test/integration/events_test.rb
+class EventsTest < ActionDispatch::IntegrationTest
+  def setup
+    inertia_test!
+  end
+
+  test 'renders inertia component' do
+    get events_path
+
+    # check the component
+    inertia.assert_component 'Event/Index'
+    # or access directly
+    assert_equal 'Event/Index', inertia.component
+
+    # props (including shared props)
+    inertia.assert_props({ title: 'Foo', description: 'Foo bar' })
+    inertia.assert_includes_props({ title: 'Foo' })
+
+    # access props
+    assert_equal 'Foo', inertia.props[:title]
+
+    # view data
+    inertia.assert_view_data({ meta: 'Foo bar' })
+    inertia.assert_includes_view_data({ meta: 'Foo bar' })
+
+    # access view data
+    assert_equal 'Foo bar', inertia.view_data[:meta]
+  end
+end
+```

@@ -293,6 +293,8 @@ end
 
 ## Testing
 
+### RSpec
+
 If you're using Rspec, Inertia Rails comes with some nice test helpers to make things simple. 
 
 To use these helpers, just add the following require statement to your `spec/rails_helper.rb`
@@ -311,7 +313,7 @@ RSpec.describe EventController, type: :request do
 end
 ```
 
-### Assertions
+#### Assertions
 
 ```ruby
 RSpec.describe EventController, type: :request do
@@ -339,8 +341,44 @@ RSpec.describe EventController, type: :request do
     
   end
 end
-
 ```
+
+### Minitest
+
+If you're using Minitest, Inertia Rails also provides test helpers for integration tests.
+
+The helpers are automatically included in `ActionDispatch::IntegrationTest`. To enable Inertia testing in your test, call `inertia_test!` in your setup:
+
+```ruby
+class EventsTest < ActionDispatch::IntegrationTest
+  def setup
+    inertia_test!
+  end
+
+  test 'renders inertia component' do
+    get events_path
+
+    # check the component
+    inertia.assert_component 'Event/Index'
+    assert_equal 'Event/Index', inertia.component
+
+    # props (including shared props)
+    inertia.assert_props({ name: 'Brandon', sport: 'hockey' })
+    inertia.assert_includes_props({ sport: 'hockey' })
+
+    # access props
+    assert_equal 'Brandon', inertia.props[:name]
+
+    # view data
+    inertia.assert_view_data({ name: 'Brian', sport: 'basketball' })
+    inertia.assert_includes_view_data({ sport: 'basketball' })
+
+    # access view data
+    assert_equal 'Brian', inertia.view_data[:name]
+  end
+end
+```
+
 
 *Maintained and sponsored by the team at [bellaWatt](https://bellawatt.com/)*
 

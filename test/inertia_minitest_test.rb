@@ -75,11 +75,11 @@ class InertiaMinitestTest < ActionDispatch::IntegrationTest
   def test_asserts_props_with_lambda_shared_props
     get lamda_shared_props_path
     inertia.assert_props({
-      someProperty: {
-        property_a: 'some value',
-        property_b: 'this value',
-      },
-      property_c: 'some other value'
-    })
+                           someProperty: {
+                             property_a: 'some value',
+                             property_b: 'this value',
+                           },
+                           property_c: 'some other value',
+                         })
   end
 end

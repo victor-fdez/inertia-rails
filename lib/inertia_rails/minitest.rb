@@ -12,11 +12,11 @@ module InertiaRails
       def inertia
         unless @_inertia_testing_enabled
           raise "Inertia test helpers aren't set up! " \
-                "Make sure you call `inertia_test!` in your test setup."
+                'Make sure you call `inertia_test!` in your test setup.'
         end
 
         if @_inertia_render_wrapper.nil? && !InertiaRails::Minitest.skip_missing_renderer_warnings
-          warn "WARNING: the test never created an Inertia renderer. " \
+          warn 'WARNING: the test never created an Inertia renderer. ' \
                "Maybe the code wasn't able to reach a `render inertia:` call?"
         end
 
