@@ -2,44 +2,12 @@
 
 require 'rspec/core'
 require 'rspec/matchers'
+require_relative 'test_helper'
 
 module InertiaRails
   module RSpec
-    class InertiaRenderWrapper
-      attr_reader :view_data, :props, :component
-
-      def initialize
-        @view_data = nil
-        @props = nil
-        @component = nil
-      end
-
-      def call(params)
-        assign_locals(params)
-        @render_method&.call(params)
-      end
-
-      def wrap_render(render_method)
-        @render_method = render_method
-        self
-      end
-
-      protected
-
-      def assign_locals(params)
-        if params[:locals].present?
-          @view_data = params[:locals].except(:page)
-          @props = params[:locals][:page][:props]
-          @component = params[:locals][:page][:component]
-        else
-          # Sequential Inertia request
-          @view_data = {}
-          json = JSON.parse(params[:json])
-          @props = json['props']
-          @component = json['component']
-        end
-      end
-    end
+    # Backwards compatibility alias
+    InertiaRenderWrapper = TestHelper::RenderWrapper
 
     module Helpers
       def inertia
@@ -62,7 +30,11 @@ module InertiaRails
       end
 
       def inertia_wrap_render(render)
-        @_inertia_render_wrapper = InertiaRenderWrapper.new.wrap_render(render)
+        @_inertia_render_wrapper = TestHelper::RenderWrapper.new(self).wrap_render(render)
+      end
+
+      def inertia_testing_enabled?
+        inertia_tests_setup?
       end
 
       protected
@@ -74,6 +46,9 @@ module InertiaRails
   end
 end
 
+# Install the shared interceptor
+InertiaRails::TestHelper.install!
+
 RSpec.configure do |config|
   config.include InertiaRails::RSpec::Helpers
   config.add_setting :inertia, default: {
@@ -81,10 +56,11 @@ RSpec.configure do |config|
   }
 
   config.before(:each, inertia: true) do
-    new_renderer = InertiaRails::Renderer.method(:new)
-    allow(InertiaRails::Renderer).to receive(:new) do |component, controller, request, response, render, named_args|
-      new_renderer.call(component, controller, request, response, inertia_wrap_render(render), **(named_args || {}))
-    end
+    InertiaRails.test_context = self
+  end
+
+  config.after(:each, inertia: true) do
+    InertiaRails.test_context = nil
   end
 end
 
