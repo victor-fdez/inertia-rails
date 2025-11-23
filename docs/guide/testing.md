@@ -14,6 +14,10 @@ Another approach to testing your page components is using a client-side unit tes
 
 In addition to testing your JavaScript page components, you'll also want to test the Inertia responses that come back from your server-side framework. A popular approach to doing this is using endpoint tests, where you make requests to your application and examine the responses.
 
+Inertia Rails provides test helpers for both RSpec and Minitest, making it easy to test your Inertia responses regardless of which testing framework you prefer.
+
+## RSpec
+
 If you're using RSpec, Inertia Rails comes with some nice test helpers to make things simple.
 
 To use these helpers, just add the following require statement to your `spec/rails_helper.rb`
@@ -70,3 +74,45 @@ RSpec.describe '/events', inertia: true do
   end
 end
 ```
+
+## Minitest
+
+If you're using Minitest, Inertia Rails also provides test helpers for integration tests.
+
+The helpers are automatically included in `ActionDispatch::IntegrationTest`. To enable Inertia testing in your test, call `inertia_test!` in your setup:
+
+```ruby
+# test/integration/events_test.rb
+class EventsTest < ActionDispatch::IntegrationTest
+  def setup
+    inertia_test!
+  end
+
+  test 'renders inertia component' do
+    get events_path
+
+    # check the component
+    inertia.assert_component 'Event/Index'
+    # or access directly
+    assert_equal 'Event/Index', inertia.component
+
+    # props (including shared props)
+    inertia.assert_props({ title: 'Foo', description: 'Foo bar' })
+    inertia.assert_includes_props({ title: 'Foo' })
+
+    # access props
+    assert_equal 'Foo', inertia.props[:title]
+
+    # view data
+    inertia.assert_view_data({ meta: 'Foo bar' })
+    inertia.assert_includes_view_data({ meta: 'Foo bar' })
+
+    # access view data
+    assert_equal 'Foo bar', inertia.view_data[:meta]
+  end
+end
+```
+
+### Assertions
+
+Inertia Rails provides several assertion methods for testing Inertia responses in Minitest. You can use methods like `assert_component`, `assert_props`, `assert_includes_props`, `assert_view_data`, and `assert_includes_view_data` to test your Inertia responses. You can also access the component, props, and view data directly for custom assertions.

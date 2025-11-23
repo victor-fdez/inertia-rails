@@ -2,6 +2,9 @@
 
 require_relative '../../lib/inertia_rails/rspec'
 
+# Configure Inertia Rails to suppress deprecation warnings in tests
+InertiaRails.configure { |c| c.always_include_errors_hash = false }
+
 class FakeStdErr
   attr_accessor :messages
 
